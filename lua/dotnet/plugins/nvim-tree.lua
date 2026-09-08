@@ -12,7 +12,7 @@ return {
 				update_root = false,
 			},
 			view = {
-				side = "left",
+				side = "right",
 				width = 35,
 				preserve_window_proportions = true,
 			},
