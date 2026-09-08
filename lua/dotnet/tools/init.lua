@@ -57,6 +57,10 @@ function M.setup()
 		require("dotnet.tools.usings_formatter").format(0)
 	end, { desc = "Sort and de-duplicate usings" })
 
+	-- Style, naming and analyzer severities for C#: a default `.editorconfig`
+	-- the language server and the formatter both read.
+	require("dotnet.tools.editorconfig").setup(group)
+
 	require("dotnet.tools.cli").setup()
 end
 

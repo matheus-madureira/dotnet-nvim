@@ -14,6 +14,7 @@ Estruturalmente inspirada na [config de C++ do SalarAlo](https://github.com/Sala
 - **Build integrado**: `:Build`, `:Run`, `:Test`, `:Watch`, `:Publish` — comandos assíncronos cujos erros do MSBuild caem no quickfix já deduplicados e navegáveis com `:cnext`.
 - **Ferramentas locais** para o que o LSP não cobre: ordenação de `using`, esqueleto de arquivo novo com namespace correto, e correção de namespace ao mover arquivos.
 - Formatação com CSharpier quando disponível, caindo para o formatador do próprio Roslyn (que respeita o `.editorconfig`) quando não.
+- **Ruleset de C# padrão**: estilo, nomenclatura e severidades de analyzers em um `.editorconfig` que o language server e o formatador leem juntos — instalado automaticamente em projetos que ainda não têm o seu.
 - Treesitter na branch `main` (a que o plugin usa por padrão hoje), com seleção incremental reimplementada, já que o módulo que a fornecia foi removido de lá.
 - Seletor de temas com persistência entre sessões e comandos de próximo/anterior.
 
@@ -70,6 +71,8 @@ Sem um compilador C a config sobe normalmente, apenas avisa uma vez e não insta
 | `:Skel [tipo]` | insere esqueleto de tipo no buffer vazio |
 | `:NamespaceFix` | realinha o namespace do arquivo com a pasta |
 | `:UsingsSort` | ordena e deduplica o bloco de `using` |
+| `:DotnetEditorConfig[!]` | escreve o `.editorconfig` padrão de C# na raiz do workspace |
+| `:DotnetEditorConfigEdit` | abre o `.editorconfig` que está valendo |
 | `:Format` | formata o buffer ou a seleção |
 | `:Dotnet ...` | operações de solução do `easy-dotnet` (new, secrets, outdated) |
 
@@ -162,6 +165,23 @@ Ao salvar um `.cs`, o bloco de `using` do topo é ordenado (System primeiro, dep
 
 O formatador é conservador de propósito: ele **não** toca no bloco se houver diretiva de pré-processador dentro dele (`#if`, `#region`), porque reordenar através de um condicional muda o que compila. `#nullable enable` acima do bloco é tolerado. Para desativar em um arquivo específico, coloque `// nousingformat` na primeira linha.
 
+### Ruleset padrão de C# (`.editorconfig`)
+
+Estilo de código, regras de nomenclatura e severidade de analyzers não são configuráveis pelo lado do Neovim: o Roslyn (e o OmniSharp) leem tudo isso do `.editorconfig`, e o CSharpier e o `dotnet format` leem dali as regras de espaçamento. É o único canal que alcança o servidor **e** o formatador — e, de quebra, faz as regras valerem também no `dotnet build`, na CI e no Visual Studio.
+
+Por isso a config traz um ruleset pronto em [`templates/dotnet.editorconfig`](templates/dotnet.editorconfig): namespaces `file_scoped`, `var` só quando o tipo é aparente, chaves obrigatórias, `readonly` em campos, modificadores de acesso explícitos, expression-bodied em propriedades e lambdas mas não em métodos, ordem de modificadores, espaçamento e quebras de linha, ordenação de `using` com `System` primeiro, além do desligamento das regras CA/IDE/Sonar que só geram ruído.
+
+Ao abrir um arquivo de um workspace .NET que **não** tem nenhum `.editorconfig` acima dele, o arquivo padrão é escrito na raiz (diretório da solução, senão do projeto, senão do repositório git). Projeto que já tem o seu nunca é tocado — as regras dele ganham.
+
+| | |
+| --- | --- |
+| `:DotnetEditorConfig` | escreve o padrão na raiz do workspace (recusa se já existir) |
+| `:DotnetEditorConfig!` | sobrescreve o que estiver lá |
+| `:DotnetEditorConfig <dir>` | escreve em um diretório específico |
+| `:DotnetEditorConfigEdit` | abre o `.editorconfig` em vigor, ou o template se não houver nenhum |
+
+Depois de gerar o arquivo, `:Roslyn restart` reaplica as severidades. `vim.g.dotnet_editorconfig = false` desliga a geração automática e mantém os comandos.
+
 ### Esqueleto de arquivo novo
 
 Ao criar um `.cs`, o arquivo já nasce com o namespace derivado do `<RootNamespace>` do `.csproj` mais a hierarquia de pastas, e com um tipo nomeado a partir do arquivo. A espécie do tipo é inferida do nome:
@@ -192,6 +212,7 @@ Ajustes ficam em `lua/dotnet/core/options.lua`:
 | `vim.g.dotnet_configuration` | `"Debug"` | Configuration usada por build, run e debug |
 | `vim.g.dotnet_file_scoped_namespaces` | `true` | `false` gera namespace com chaves em vez de `namespace X;` |
 | `vim.g.dotnet_skeleton_on_new` | `true` | `false` desliga o esqueleto automático (mas mantém `:Skel`) |
+| `vim.g.dotnet_editorconfig` | `true` | `false` para de gerar o `.editorconfig` padrão (mas mantém `:DotnetEditorConfig`) |
 
 Formatação ao salvar pode ser desligada com `:FormatDisable` (global) ou `:FormatDisable!` (só o buffer), e religada com `:FormatEnable`.
 
@@ -205,6 +226,7 @@ lua/dotnet/plugins/           Specs dos plugins
 lua/dotnet/plugins/lsp/       Mason, nvim-lspconfig e roslyn.nvim
 lua/dotnet/tools/             Ferramentas locais (projeto, usings, skeleton, CLI)
 snippets/                     Snippets de C# do LuaSnip
+templates/                    Ruleset padrão de C# (.editorconfig)
 ```
 
 `lua/dotnet/tools/project.lua` é a base das demais: descobre o `.csproj`/`.sln` dono de um arquivo, lê `<RootNamespace>` e `<AssemblyName>`, deriva o namespace correto e localiza a DLL de saída mais recente.

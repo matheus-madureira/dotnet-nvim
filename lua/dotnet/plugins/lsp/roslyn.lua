@@ -49,6 +49,11 @@ return {
 		vim.lsp.config("roslyn", {
 			capabilities = require("cmp_nvim_lsp").default_capabilities(),
 			settings = {
+				-- Code style, naming rules and analyzer severities are *not* set
+				-- here: Roslyn takes those from the workspace `.editorconfig`,
+				-- which `lua/dotnet/tools/editorconfig.lua` seeds from
+				-- `templates/dotnet.editorconfig`. What follows is the part of the
+				-- server's behaviour that has no .editorconfig equivalent.
 				["csharp|background_analysis"] = {
 					dotnet_analyzer_diagnostics_scope = "fullSolution",
 					dotnet_compiler_diagnostics_scope = "fullSolution",
@@ -75,6 +80,12 @@ return {
 				},
 				["csharp|symbol_search"] = {
 					dotnet_search_reference_assemblies = true,
+				},
+				["csharp|formatting"] = {
+					-- Makes formatting honour `dotnet_sort_system_directives_first`
+					-- and `dotnet_separate_import_directive_groups`, which are inert
+					-- until something asks the server to organize imports.
+					dotnet_organize_imports_on_format = true,
 				},
 			},
 		})

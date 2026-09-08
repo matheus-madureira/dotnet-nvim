@@ -108,6 +108,8 @@ return {
 				capabilities = capabilities,
 				settings = {
 					FormattingOptions = {
+						-- Same source of truth as Roslyn: the workspace
+						-- `.editorconfig` seeded from templates/dotnet.editorconfig.
 						EnableEditorConfigSupport = true,
 						OrganizeImports = true,
 					},

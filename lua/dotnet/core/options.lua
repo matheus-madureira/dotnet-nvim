@@ -7,6 +7,14 @@ vim.g.dotnet_lsp = vim.g.dotnet_lsp or "roslyn"
 -- Configuration used by `dotnet build` / `dotnet run` / the debugger.
 vim.g.dotnet_configuration = vim.g.dotnet_configuration or "Debug"
 
+-- Whether a workspace with no `.editorconfig` of its own gets the default C#
+-- ruleset from `templates/dotnet.editorconfig`. That file is what carries the
+-- style, naming and analyzer severity rules to the language server *and* to the
+-- formatter; `false` leaves projects alone and keeps `:DotnetEditorConfig`.
+if vim.g.dotnet_editorconfig == nil then
+	vim.g.dotnet_editorconfig = true
+end
+
 local opt = vim.opt
 
 opt.relativenumber = true

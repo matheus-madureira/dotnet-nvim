@@ -8,7 +8,10 @@ return {
 		conform.setup({
 			formatters_by_ft = {
 				-- CSharpier when it is installed; otherwise `lsp_format` below
-				-- falls back to Roslyn's own formatter, which respects .editorconfig.
+				-- falls back to Roslyn's own formatter. Either way the whitespace
+				-- rules come from the `.editorconfig` in the workspace -- the
+				-- default one lives in `templates/dotnet.editorconfig` and is
+				-- installed by `lua/dotnet/tools/editorconfig.lua`.
 				cs = { "csharpier" },
 				lua = { "stylua" },
 				json = { "prettier" },
