@@ -1,0 +1,5 @@
+# Lua and config files are LF everywhere; Neovim does not care and diffs stay clean.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary

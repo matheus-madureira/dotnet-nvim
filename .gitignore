@@ -1,0 +1,15 @@
+# lazy.nvim bootstraps itself; the lockfile is committed on purpose.
+.luarc.json
+
+# editor / OS noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# spell files downloaded by Neovim at runtime
+spell/
+
+# anything a session or shada dump leaves behind
+*.shada
+session.vim
