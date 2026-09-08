@@ -6,8 +6,16 @@ return {
 		"nvim-lua/plenary.nvim",
 		"nvim-telescope/telescope.nvim",
 	},
-	ft = { "cs", "fsharp", "vb", "razor", "xml" },
+	-- Loaded on demand only: `setup()` spawns a background `dotnet` RPC server,
+	-- which is not worth paying for in every C# buffer when this plugin is here
+	-- for occasional solution-level work.
 	cmd = { "Dotnet" },
+	keys = {
+		{ "<leader>pn", "<cmd>Dotnet new<CR>", desc = "New project from template" },
+		{ "<leader>pp", "<cmd>Dotnet project<CR>", desc = "Pick project" },
+		{ "<leader>po", "<cmd>Dotnet outdated<CR>", desc = "Outdated NuGet packages" },
+		{ "<leader>pk", "<cmd>Dotnet secrets<CR>", desc = "Edit user secrets" },
+	},
 	config = function()
 		require("easy-dotnet").setup({
 			terminal = function(path, action, args)
@@ -39,11 +47,5 @@ return {
 				enabled = true,
 			},
 		})
-
-		local keymap = vim.keymap
-		keymap.set("n", "<leader>pn", "<cmd>Dotnet new<CR>", { desc = "New project from template" })
-		keymap.set("n", "<leader>pp", "<cmd>Dotnet project<CR>", { desc = "Pick project" })
-		keymap.set("n", "<leader>po", "<cmd>Dotnet outdated<CR>", { desc = "Outdated NuGet packages" })
-		keymap.set("n", "<leader>pk", "<cmd>Dotnet secrets<CR>", { desc = "Edit user secrets" })
 	end,
 }

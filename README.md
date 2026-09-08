@@ -14,6 +14,7 @@ Estruturalmente inspirada na [config de C++ do SalarAlo](https://github.com/Sala
 - **Build integrado**: `:Build`, `:Run`, `:Test`, `:Watch`, `:Publish` — comandos assíncronos cujos erros do MSBuild caem no quickfix já deduplicados e navegáveis com `:cnext`.
 - **Ferramentas locais** para o que o LSP não cobre: ordenação de `using`, esqueleto de arquivo novo com namespace correto, e correção de namespace ao mover arquivos.
 - Formatação com CSharpier quando disponível, caindo para o formatador do próprio Roslyn (que respeita o `.editorconfig`) quando não.
+- Treesitter na branch `main` (a que o plugin usa por padrão hoje), com seleção incremental reimplementada, já que o módulo que a fornecia foi removido de lá.
 - Seletor de temas com persistência entre sessões e comandos de próximo/anterior.
 
 ## Instalação
@@ -36,7 +37,9 @@ git clone <url-do-repo> $env:LOCALAPPDATA\nvim
 nvim
 ```
 
-No primeiro start, o `lazy.nvim` se instala, baixa os plugins e o Mason busca o servidor Roslyn, o `netcoredbg`, o CSharpier e o `stylua`. Isso leva alguns minutos — acompanhe com `:Mason`.
+No primeiro start, o `lazy.nvim` se instala, baixa os plugins e o Mason busca o servidor Roslyn, o `netcoredbg`, o CSharpier, o `tree-sitter` CLI e o `stylua`. Isso leva alguns minutos — acompanhe com `:Mason`.
+
+O servidor Roslyn não está no registry padrão do Mason; a config adiciona `github:crashdummyy/mason-registry`, que é o que o `roslyn.nvim` acompanha. Os parsers do Treesitter só começam a compilar depois que o Mason termina, porque dependem do `tree-sitter` CLI que ele instala.
 
 ### Pré-requisitos
 
@@ -45,7 +48,8 @@ No primeiro start, o `lazy.nvim` se instala, baixa os plugins e o Mason busca o 
 | Neovim >= 0.11 | `vim.lsp.config`, `vim.system` | sim |
 | [.NET SDK](https://dotnet.microsoft.com/download) | LSP, build, testes, debug | sim |
 | `git` | bootstrap do lazy.nvim e dos plugins | sim |
-| Compilador C (`zig`, `gcc`, `clang` ou MSVC) | compilar os parsers do Treesitter | recomendado |
+| Compilador C (`gcc`, `clang`, MSVC ou `zig`) | compilar os parsers do Treesitter | recomendado |
+| `tree-sitter` CLI | gerar parsers do Treesitter (o Mason instala) | recomendado |
 | `ripgrep` | `live_grep` e `<leader>fp` no Telescope | recomendado |
 | `make` | build do `telescope-fzf-native` (pulado se ausente) | opcional |
 
@@ -89,6 +93,7 @@ A tecla líder é `<Space>`.
 | `<C-n>` / `<leader>e` | Alternar / focar a árvore de arquivos |
 | `<Tab>` / `<S-Tab>` | Próximo / anterior buffer |
 | `<leader>x` | Fechar buffer |
+| `<C-space>` / `<BS>` | Expandir / reduzir a seleção por nó do Treesitter |
 
 ### LSP
 
