@@ -5,13 +5,32 @@ return {
 	config = function()
 		local conform = require("conform")
 
+		--- Which engine gets to format a buffer.
+		---
+		--- For C# the answer is the language server: Roslyn's formatter is the one
+		--- that reads `csharp_new_line_*`, `csharp_space_*`, `csharp_indent_*` and
+		--- the rest of the whitespace section of the workspace `.editorconfig`
+		--- (`templates/dotnet.editorconfig`), so saving a file applies exactly the
+		--- rules the diagnostics are complaining about. CSharpier is opinionated
+		--- by design -- it reads indentation, line ending and print width and
+		--- decides everything else itself -- so it would quietly overrule the
+		--- ruleset. It stays as the fallback for what the server cannot do
+		--- (formatting a range, or a buffer with no server attached), and
+		--- `vim.g.dotnet_formatter = "csharpier"` puts it back in charge.
+		local function lsp_format(bufnr)
+			bufnr = (bufnr == nil or bufnr == 0) and vim.api.nvim_get_current_buf() or bufnr
+
+			if vim.bo[bufnr].filetype == "cs" and vim.g.dotnet_formatter ~= "csharpier" then
+				return "prefer"
+			end
+
+			return "fallback"
+		end
+
 		conform.setup({
 			formatters_by_ft = {
-				-- CSharpier when it is installed; otherwise `lsp_format` below
-				-- falls back to Roslyn's own formatter. Either way the whitespace
-				-- rules come from the `.editorconfig` in the workspace -- the
-				-- default one lives in `templates/dotnet.editorconfig` and is
-				-- installed by `lua/dotnet/tools/editorconfig.lua`.
+				-- Roslyn formats C# (see `lsp_format` above); CSharpier is the
+				-- fallback, and takes over when `vim.g.dotnet_formatter` says so.
 				cs = { "csharpier" },
 				lua = { "stylua" },
 				json = { "prettier" },
@@ -30,7 +49,7 @@ return {
 					return
 				end
 
-				return { timeout_ms = 3000, lsp_format = "fallback" }
+				return { timeout_ms = 3000, lsp_format = lsp_format(bufnr) }
 			end,
 		})
 
@@ -44,7 +63,7 @@ return {
 				}
 			end
 
-			conform.format({ async = true, lsp_format = "fallback", range = range })
+			conform.format({ async = true, lsp_format = lsp_format(0), range = range })
 		end, { range = true, desc = "Format buffer or range" })
 
 		vim.api.nvim_create_user_command("FormatDisable", function(args)
@@ -61,7 +80,7 @@ return {
 		end, { desc = "Re-enable format on save" })
 
 		vim.keymap.set({ "n", "v" }, "<leader>mp", function()
-			conform.format({ async = true, lsp_format = "fallback" })
+			conform.format({ async = true, lsp_format = lsp_format(0) })
 		end, { desc = "Format file or range" })
 	end,
 }

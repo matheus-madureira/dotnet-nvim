@@ -1,13 +1,35 @@
 local M = {}
 
+--- True when saving this buffer will hand the using block to the language
+--- server: a formatting-capable client is attached, format-on-save is on, and
+--- the server -- not CSharpier -- is the one doing it.
+local function lsp_organizes_usings(bufnr)
+	if vim.g.dotnet_formatter == "csharpier" then
+		return false
+	end
+
+	if vim.b[bufnr].disable_autoformat or vim.g.disable_autoformat then
+		return false
+	end
+
+	return #vim.lsp.get_clients({ bufnr = bufnr, method = "textDocument/formatting" }) > 0
+end
+
 function M.setup()
 	local group = vim.api.nvim_create_augroup("DotnetTools", { clear = true })
 
-	-- Sort and de-duplicate the using block on save.
+	-- Sort and de-duplicate the using block on save -- unless the language server
+	-- is about to do it anyway. With `dotnet_organize_imports_on_format` the
+	-- format-on-save pass rewrites the whole block straight from the
+	-- `.editorconfig`, so running both means the second one undoes the first.
 	vim.api.nvim_create_autocmd("BufWritePre", {
 		group = group,
 		pattern = { "*.cs", "*.csx" },
 		callback = function(args)
+			if lsp_organizes_usings(args.buf) then
+				return
+			end
+
 			require("dotnet.tools.usings_formatter").format(args.buf)
 		end,
 	})

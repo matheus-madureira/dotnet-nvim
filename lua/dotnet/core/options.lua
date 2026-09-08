@@ -7,6 +7,11 @@ vim.g.dotnet_lsp = vim.g.dotnet_lsp or "roslyn"
 -- Configuration used by `dotnet build` / `dotnet run` / the debugger.
 vim.g.dotnet_configuration = vim.g.dotnet_configuration or "Debug"
 
+-- What formats C# on save: "lsp" (default) runs the Roslyn formatter, which is
+-- the one that applies the whitespace rules from `.editorconfig`; "csharpier"
+-- hands the file to CSharpier instead, which imposes its own layout.
+vim.g.dotnet_formatter = vim.g.dotnet_formatter or "lsp"
+
 -- Whether a workspace with no `.editorconfig` of its own gets the default C#
 -- ruleset from `templates/dotnet.editorconfig`. That file is what carries the
 -- style, naming and analyzer severity rules to the language server *and* to the

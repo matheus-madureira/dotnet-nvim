@@ -13,7 +13,7 @@ Estruturalmente inspirada na [config de C++ do SalarAlo](https://github.com/Sala
 - **Testes** com `neotest` + `neotest-dotnet`: xUnit, NUnit e MSTest descobertos na solução inteira, executáveis e depuráveis a partir do buffer.
 - **Build integrado**: `:Build`, `:Run`, `:Test`, `:Watch`, `:Publish` — comandos assíncronos cujos erros do MSBuild caem no quickfix já deduplicados e navegáveis com `:cnext`.
 - **Ferramentas locais** para o que o LSP não cobre: ordenação de `using`, esqueleto de arquivo novo com namespace correto, e correção de namespace ao mover arquivos.
-- Formatação com CSharpier quando disponível, caindo para o formatador do próprio Roslyn (que respeita o `.editorconfig`) quando não.
+- **Formatação ao salvar pelo próprio Roslyn**, que é quem aplica as regras de espaçamento e quebra de linha do `.editorconfig` — e ainda reorganiza os `using` no mesmo passe. CSharpier continua disponível como alternativa opt-in.
 - **Ruleset de C# padrão**: estilo, nomenclatura e severidades de analyzers em um `.editorconfig` que o language server e o formatador leem juntos — instalado automaticamente em projetos que ainda não têm o seu.
 - Treesitter na branch `main` (a que o plugin usa por padrão hoje), com seleção incremental reimplementada, já que o módulo que a fornecia foi removido de lá.
 - Seletor de temas com persistência entre sessões e comandos de próximo/anterior.
@@ -163,6 +163,8 @@ Estas vivem em `lua/dotnet/tools/` e são o equivalente C# dos utilitários de `
 
 Ao salvar um `.cs`, o bloco de `using` do topo é ordenado (System primeiro, depois o resto em ordem ordinal), deduplicado e agrupado por espécie: `extern alias`, `global using`, `using`, `using static` e aliases, cada grupo separado por linha em branco.
 
+Isso vale quando o language server não está fazendo o serviço: com o Roslyn anexado e formatação ao salvar ligada, o passe local sai de cena, porque o servidor reescreve o bloco inteiro a partir do `.editorconfig` logo em seguida — e as duas ordenações discordam no espaçamento entre grupos.
+
 O formatador é conservador de propósito: ele **não** toca no bloco se houver diretiva de pré-processador dentro dele (`#if`, `#region`), porque reordenar através de um condicional muda o que compila. `#nullable enable` acima do bloco é tolerado. Para desativar em um arquivo específico, coloque `// nousingformat` na primeira linha.
 
 ### Ruleset padrão de C# (`.editorconfig`)
@@ -181,6 +183,14 @@ Ao abrir um arquivo de um workspace .NET que **não** tem nenhum `.editorconfig`
 | `:DotnetEditorConfigEdit` | abre o `.editorconfig` em vigor, ou o template se não houver nenhum |
 
 Depois de gerar o arquivo, `:Roslyn restart` reaplica as severidades. `vim.g.dotnet_editorconfig = false` desliga a geração automática e mantém os comandos.
+
+#### Quem formata ao salvar
+
+Quem aplica essas regras ao salvar é o **Roslyn**, não o CSharpier: o formatador do servidor lê `csharp_new_line_*`, `csharp_space_*`, `csharp_indent_*` e companhia direto do `.editorconfig`, e — com `dotnet_organize_imports_on_format` ligado — reordena os `using` no mesmo passe, respeitando `dotnet_sort_system_directives_first` e `dotnet_separate_import_directive_groups`. O CSharpier é opinativo por natureza: das regras do arquivo ele lê indentação, fim de linha e largura de linha, e decide o resto sozinho — o que sobrescreveria o ruleset.
+
+Ele segue instalado e assume em dois casos: quando não há servidor anexado ao buffer (ou o que há não formata trechos, no `:Format` sobre uma seleção), e quando você pede, com `vim.g.dotnet_formatter = "csharpier"`.
+
+Uma coisa que **não** acontece ao salvar: correções de estilo. Regras como `csharp_style_namespace_declarations = file_scoped` ou `csharp_style_var_elsewhere = false` viram diagnóstico (`IDE0161`, `IDE0008`) com a severidade que você definiu, e se corrigem com o code action em cima do diagnóstico (`<leader>ca`) — não pelo formatador. O servidor Roslyn anuncia apenas os code actions `quickfix` e `refactor`, sem o `source.fixAll` que o VS Code usa para arrumar tudo ao salvar. Para um passe em lote existe o `:DotnetFormat`, que roda `dotnet format` no alvo inteiro.
 
 ### Esqueleto de arquivo novo
 
@@ -213,6 +223,7 @@ Ajustes ficam em `lua/dotnet/core/options.lua`:
 | `vim.g.dotnet_file_scoped_namespaces` | `true` | `false` gera namespace com chaves em vez de `namespace X;` |
 | `vim.g.dotnet_skeleton_on_new` | `true` | `false` desliga o esqueleto automático (mas mantém `:Skel`) |
 | `vim.g.dotnet_editorconfig` | `true` | `false` para de gerar o `.editorconfig` padrão (mas mantém `:DotnetEditorConfig`) |
+| `vim.g.dotnet_formatter` | `"lsp"` | `"csharpier"` entrega a formatação de C# ao CSharpier em vez do Roslyn |
 
 Formatação ao salvar pode ser desligada com `:FormatDisable` (global) ou `:FormatDisable!` (só o buffer), e religada com `:FormatEnable`.
 
