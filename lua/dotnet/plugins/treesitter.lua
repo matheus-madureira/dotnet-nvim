@@ -26,8 +26,9 @@ return {
 		if not compiler_available then
 			vim.schedule(function()
 				vim.notify(
-					"Treesitter parsers need a C compiler. Install one (`winget install zig.zig` "
-						.. "on Windows, or your distro's `gcc`/`clang`) and run `:TSUpdate`.",
+					"Treesitter parsers need a C compiler. On Windows: "
+						.. "`winget install --id=BrechtSanders.WinLibs.POSIX.UCRT -e`. "
+						.. "Elsewhere install `gcc` or `clang`. Then run `:TSUpdate`.",
 					vim.log.levels.WARN
 				)
 			end)

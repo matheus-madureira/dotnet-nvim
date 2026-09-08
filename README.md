@@ -49,7 +49,7 @@ No primeiro start, o `lazy.nvim` se instala, baixa os plugins e o Mason busca o 
 | `ripgrep` | `live_grep` e `<leader>fp` no Telescope | recomendado |
 | `make` | build do `telescope-fzf-native` (pulado se ausente) | opcional |
 
-Sem um compilador C a config sobe normalmente, apenas avisa uma vez e não instala parsers. No Windows, `winget install zig.zig` resolve; depois rode `:TSUpdate`.
+Sem um compilador C a config sobe normalmente, apenas avisa uma vez e não instala parsers. No Windows, `winget install --id=BrechtSanders.WinLibs.POSIX.UCRT -e` resolve; depois rode `:TSUpdate`.
 
 ## Comandos .NET
 
