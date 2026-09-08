@@ -3,7 +3,7 @@ local colorschemes = require("dotnet.core.colorschemes")
 
 local config = {
 	themes = colorschemes.names(),
-	default = "tokyonight-night",
+	default = "koda",
 	state_file = vim.fn.stdpath("state") .. "/theme.txt",
 }
 

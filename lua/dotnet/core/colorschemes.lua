@@ -2,6 +2,10 @@ local M = {}
 
 M.items = {
 	{
+		repo = "oskarnurm/koda.nvim",
+		schemes = { "koda", "koda-dark", "koda-light", "koda-glade", "koda-moss" },
+	},
+	{
 		repo = "andreypopp/vim-colors-plain",
 		schemes = { "plain", "plain-cterm" },
 	},
