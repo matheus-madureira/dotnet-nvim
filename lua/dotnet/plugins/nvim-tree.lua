@@ -27,7 +27,7 @@ return {
 				group_empty = true,
 			},
 			filters = {
-				custom = { "^%.git$", "^bin$", "^obj$" },
+				custom = { "^%.git$", "^%.vs$", "^bin$", "^obj$" },
 			},
 			git = { enable = false },
 			tab = {

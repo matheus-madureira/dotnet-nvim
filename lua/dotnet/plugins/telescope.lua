@@ -20,6 +20,9 @@ return {
 			defaults = {
 				file_ignore_patterns = {
 					"node_modules",
+					-- `%p` is any separator, so this catches .vs/ and .vs\ but
+					-- not .vscode. Visual Studio caches stale solution copies there.
+					"%.vs%p",
 					"%.git[/\\]",
 					"[/\\]bin[/\\]",
 					"[/\\]obj[/\\]",
