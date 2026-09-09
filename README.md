@@ -9,6 +9,7 @@ Estruturalmente inspirada na [config de C++ do SalarAlo](https://github.com/Sala
 - Gerenciamento de plugins com [lazy.nvim](https://github.com/folke/lazy.nvim), instalado automaticamente no primeiro start.
 - **C# via [roslyn.nvim](https://github.com/seblyng/roslyn.nvim)** — o mesmo servidor Roslyn que roda por trás da extensão oficial do VS Code, com análise de solução inteira, inlay hints e code lens. OmniSharp fica disponível como alternativa opt-in.
 - LSP também para XML (`.csproj`, `Directory.Build.props`, `.targets`), JSON, YAML e Lua.
+- **Diagnósticos inline** com [tiny-inline-diagnostic.nvim](https://github.com/rachartier/tiny-inline-diagnostic.nvim): a mensagem aparece ao lado da linha sob o cursor, já com o código da regra (`CS0103`, `IDE0090`) — que é o que liga o diagnóstico de volta à regra no `.editorconfig` — e quebrada em várias linhas quando é longa, como as do Roslyn costumam ser. `<leader>id` liga e desliga.
 - **Debugging** com `nvim-dap` + `netcoredbg`: `<leader>dc` compila o projeto dono do arquivo atual, encontra a DLL em `bin/<Configuration>/<tfm>/` e anexa o debugger.
 - **Testes** com `neotest` + `neotest-dotnet`: xUnit, NUnit e MSTest descobertos na solução inteira, executáveis e depuráveis a partir do buffer.
 - **Build integrado**: `:Build`, `:Run`, `:Test`, `:Watch`, `:Publish` — comandos assíncronos cujos erros do MSBuild caem no quickfix já deduplicados e navegáveis com `:cnext`.
@@ -110,6 +111,7 @@ A tecla líder é `<Space>`.
 | `<leader>d` / `<leader>D` | Diagnósticos da linha / do buffer |
 | `[d` / `]d` | Diagnóstico anterior / próximo |
 | `<leader>ih` | Alternar inlay hints |
+| `<leader>id` | Alternar diagnósticos inline |
 | `<leader>ci`, `<leader>co`, `<leader>ch`, `<leader>cu` | Chamadas entrando/saindo, implementações, referências |
 | `<leader>rt` / `<leader>rr` | Escolher solução alvo / reiniciar o Roslyn |
 | `<leader>mp` | Formatar arquivo ou seleção |

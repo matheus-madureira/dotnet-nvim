@@ -79,10 +79,10 @@ return {
 
 		-- diagnostic signs and inline diagnostics
 		vim.diagnostic.config({
-			virtual_text = {
-				prefix = "●",
-				spacing = 2,
-			},
+			-- tiny-inline-diagnostic.nvim draws the end-of-line diagnostics itself
+			-- (see `lua/dotnet/plugins/tiny-inline-diagnostic.lua`); leaving the
+			-- built-in virtual text on would print every message twice.
+			virtual_text = false,
 			signs = {
 				text = {
 					[vim.diagnostic.severity.ERROR] = " ",
