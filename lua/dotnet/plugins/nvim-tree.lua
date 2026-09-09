@@ -13,7 +13,7 @@ return {
 			},
 			view = {
 				side = "right",
-				width = 35,
+				width = 50,
 				preserve_window_proportions = true,
 			},
 			actions = {
