@@ -3,7 +3,7 @@ local colorschemes = require("dotnet.core.colorschemes")
 
 local config = {
 	themes = colorschemes.names(),
-	default = "koda",
+	default = "vscode",
 	state_file = vim.fn.stdpath("state") .. "/theme.txt",
 }
 
@@ -39,7 +39,6 @@ local function apply(name, opts)
 		vim.notify(("Unknown theme: %s"):format(name), vim.log.levels.ERROR)
 		return false
 	end
-
 
 	local ok, err = pcall(vim.cmd.colorscheme, name)
 	if not ok then

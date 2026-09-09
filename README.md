@@ -157,7 +157,7 @@ A tecla líder é `<Space>`.
 | `<leader>ts` | Escolher tema |
 | `<leader>tn` / `<leader>tp` | Próximo / anterior tema |
 
-A escolha fica gravada em `stdpath("state")/theme.txt` e volta no próximo start.
+A escolha fica gravada em `stdpath("state")/theme.txt` e volta no próximo start. Sem nada gravado, o padrão é o [vscode.nvim](https://github.com/Mofiqul/vscode.nvim) — as cores do VS Code, na variante dark, que é a que `vim.o.background` seleciona.
 
 ## Ferramentas locais
 

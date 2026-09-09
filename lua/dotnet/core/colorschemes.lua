@@ -2,6 +2,12 @@ local M = {}
 
 M.items = {
 	{
+		-- Dark or light follows `vim.o.background`, which `core/options.lua`
+		-- pins to dark; there is no separate `vscode-dark` scheme to select.
+		repo = "Mofiqul/vscode.nvim",
+		schemes = { "vscode" },
+	},
+	{
 		repo = "oskarnurm/koda.nvim",
 		schemes = { "koda", "koda-dark", "koda-light", "koda-glade", "koda-moss" },
 	},
