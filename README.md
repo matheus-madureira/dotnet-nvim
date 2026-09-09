@@ -231,6 +231,8 @@ Ajustes ficam em `lua/dotnet/core/options.lua`:
 
 Formatação ao salvar pode ser desligada com `:FormatDisable` (global) ou `:FormatDisable!` (só o buffer), e religada com `:FormatEnable`.
 
+Todo save que formata deixa o arquivo terminando em uma linha vazia — a que o VS Code mostra no fim do arquivo. É uma quebra de linha a mais do que o `insert_final_newline` do `.editorconfig` pede: essa o Neovim já escreve sozinho, por `'fixendofline'`, e ela termina a última linha com conteúdo em vez de deixar uma linha vazia depois dela. Formatadores que aparam linhas em branco no fim — `dotnet format`, CSharpier, prettier — a removem quando rodam; ela é reposta depois deles, no mesmo save. Só vale para os filetypes que esta config formata.
+
 Quando um save não formata — servidor ainda carregando a solução, formatador que o Mason não instalou — a mensagem aparece como aviso em vez de o arquivo simplesmente não mudar. `:ConformInfo` mostra o que está disponível para o buffer atual.
 
 ## Estrutura

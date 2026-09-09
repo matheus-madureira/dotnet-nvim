@@ -27,6 +27,29 @@ return {
 			return "fallback"
 		end
 
+		--- Leave the buffer ending in an empty line, so the saved file carries a
+		--- blank line after its last line of content.
+		---
+		--- Note this is one newline more than `insert_final_newline` asks for: that
+		--- rule is about the newline that terminates the last line, which Neovim
+		--- already writes on its own (`'fixendofline'`, which is where Neovim maps
+		--- the rule). What it does not do is leave the empty line VS Code shows at
+		--- the bottom of a file, and that is what this adds.
+		---
+		--- Formatters that trim trailing blank lines -- `dotnet format`, CSharpier,
+		--- prettier -- take it back out when they run, including on the next save,
+		--- which is fine: this runs after them, so the file on disk keeps it.
+		local function insert_final_blank_line(bufnr)
+			local line_count = vim.api.nvim_buf_line_count(bufnr)
+			local last_line = vim.api.nvim_buf_get_lines(bufnr, line_count - 1, line_count, false)[1]
+
+			if last_line == nil or last_line == "" then
+				return
+			end
+
+			vim.api.nvim_buf_set_lines(bufnr, line_count, line_count, false, { "" })
+		end
+
 		local formatters_by_ft = {
 			-- Roslyn formats C# (see `lsp_format` above); CSharpier is the
 			-- fallback, and takes over when `vim.g.dotnet_formatter` says so.
@@ -62,12 +85,22 @@ return {
 				local timeout_ms = filetype == "cs" and 10000 or 3000
 
 				return { timeout_ms = timeout_ms, lsp_format = lsp_format(bufnr) }, function(err)
+					-- Both of these are scoped to the filetypes this config formats.
+					-- Every other buffer legitimately has no formatter, and neither a
+					-- warning on every write nor a line it did not ask for belongs
+					-- there.
+					if not formatters_by_ft[filetype] then
+						return
+					end
+
+					-- Runs whether or not the formatter got anywhere: the file is being
+					-- written either way.
+					insert_final_blank_line(bufnr)
+
 					-- A save that formatted nothing looks exactly like a save that
 					-- formatted an already-clean file: no message, no change. Say so
-					-- out loud instead, but only for the filetypes that are supposed
-					-- to be formatted -- every other buffer legitimately has no
-					-- formatter and would warn on every write.
-					if not err or not formatters_by_ft[filetype] then
+					-- out loud instead.
+					if not err then
 						return
 					end
 
