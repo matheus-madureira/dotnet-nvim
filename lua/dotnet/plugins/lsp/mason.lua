@@ -46,6 +46,8 @@ return {
 				"csharpier", -- opinionated C# formatter
 				"tree-sitter-cli", -- required by nvim-treesitter `main` to build parsers
 				"stylua", -- for this config's own Lua files
+				"prettier", -- JSON, YAML and Markdown -- appsettings, CI workflows, docs
+				"xmlformatter", -- .csproj, Directory.Build.props, .targets
 			},
 			run_on_start = true,
 			auto_update = false,

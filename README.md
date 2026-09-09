@@ -39,7 +39,7 @@ git clone <url-do-repo> $env:LOCALAPPDATA\nvim
 nvim
 ```
 
-No primeiro start, o `lazy.nvim` se instala, baixa os plugins e o Mason busca o servidor Roslyn, o `netcoredbg`, o CSharpier, o `tree-sitter` CLI e o `stylua`. Isso leva alguns minutos — acompanhe com `:Mason`.
+No primeiro start, o `lazy.nvim` se instala, baixa os plugins e o Mason busca o servidor Roslyn, o `netcoredbg`, o CSharpier, o `tree-sitter` CLI, o `stylua`, o `prettier` e o `xmlformatter`. Isso leva alguns minutos — acompanhe com `:Mason`.
 
 O servidor Roslyn não está no registry padrão do Mason; a config adiciona `github:crashdummyy/mason-registry`, que é o que o `roslyn.nvim` acompanha. Os parsers do Treesitter só começam a compilar depois que o Mason termina, porque dependem do `tree-sitter` CLI que ele instala.
 
@@ -53,6 +53,8 @@ O servidor Roslyn não está no registry padrão do Mason; a config adiciona `gi
 | Compilador C (`gcc`, `clang`, MSVC ou `zig`) | compilar os parsers do Treesitter | recomendado |
 | `tree-sitter` CLI | gerar parsers do Treesitter (o Mason instala) | recomendado |
 | `ripgrep` | `live_grep` e `<leader>fp` no Telescope | recomendado |
+| Node.js | o Mason instala o `prettier` (JSON, YAML, Markdown) com ele | recomendado |
+| Python 3 | o Mason instala o `xmlformatter` (`.csproj`, `.props`, `.targets`) com ele | recomendado |
 | `make` | build do `telescope-fzf-native` (pulado se ausente) | opcional |
 
 Sem um compilador C a config sobe normalmente, apenas avisa uma vez e não instala parsers. No Windows, `winget install --id=BrechtSanders.WinLibs.POSIX.UCRT -e` resolve; depois rode `:TSUpdate`.
@@ -228,6 +230,8 @@ Ajustes ficam em `lua/dotnet/core/options.lua`:
 | `vim.g.dotnet_formatter` | `"lsp"` | `"csharpier"` entrega a formatação de C# ao CSharpier em vez do Roslyn |
 
 Formatação ao salvar pode ser desligada com `:FormatDisable` (global) ou `:FormatDisable!` (só o buffer), e religada com `:FormatEnable`.
+
+Quando um save não formata — servidor ainda carregando a solução, formatador que o Mason não instalou — a mensagem aparece como aviso em vez de o arquivo simplesmente não mudar. `:ConformInfo` mostra o que está disponível para o buffer atual.
 
 ## Estrutura
 

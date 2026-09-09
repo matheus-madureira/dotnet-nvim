@@ -27,18 +27,20 @@ return {
 			return "fallback"
 		end
 
+		local formatters_by_ft = {
+			-- Roslyn formats C# (see `lsp_format` above); CSharpier is the
+			-- fallback, and takes over when `vim.g.dotnet_formatter` says so.
+			cs = { "csharpier" },
+			lua = { "stylua" },
+			json = { "prettier" },
+			jsonc = { "prettier" },
+			yaml = { "prettier" },
+			markdown = { "prettier" },
+			xml = { "xmlformatter" },
+		}
+
 		conform.setup({
-			formatters_by_ft = {
-				-- Roslyn formats C# (see `lsp_format` above); CSharpier is the
-				-- fallback, and takes over when `vim.g.dotnet_formatter` says so.
-				cs = { "csharpier" },
-				lua = { "stylua" },
-				json = { "prettier" },
-				jsonc = { "prettier" },
-				yaml = { "prettier" },
-				markdown = { "prettier" },
-				xml = { "xmlformatter" },
-			},
+			formatters_by_ft = formatters_by_ft,
 			default_format_opts = {
 				lsp_format = "fallback",
 			},
@@ -49,7 +51,29 @@ return {
 					return
 				end
 
-				return { timeout_ms = 3000, lsp_format = lsp_format(bufnr) }
+				local filetype = vim.bo[bufnr].filetype
+
+				-- Roslyn only answers a formatting request once the solution behind
+				-- the file has finished loading, and on a real solution that takes
+				-- longer than the first save after opening Neovim. Three seconds is
+				-- plenty for a local formatter and not enough for the server, and a
+				-- request that times out formats nothing at all -- `"prefer"` hands
+				-- the buffer to the server, so CSharpier does not pick up the pieces.
+				local timeout_ms = filetype == "cs" and 10000 or 3000
+
+				return { timeout_ms = timeout_ms, lsp_format = lsp_format(bufnr) }, function(err)
+					-- A save that formatted nothing looks exactly like a save that
+					-- formatted an already-clean file: no message, no change. Say so
+					-- out loud instead, but only for the filetypes that are supposed
+					-- to be formatted -- every other buffer legitimately has no
+					-- formatter and would warn on every write.
+					if not err or not formatters_by_ft[filetype] then
+						return
+					end
+
+					local message = type(err) == "table" and (err.message or vim.inspect(err)) or tostring(err)
+					vim.notify("Format on save: " .. message, vim.log.levels.WARN)
+				end
 			end,
 		})
 
